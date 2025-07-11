@@ -1,0 +1,7 @@
+# keep secrets & binaries out of Git
+.env
+config/*/privatekey
+config/peer_*/*.png
+config/peer_*/*.conf
+*.pid
+*.sock

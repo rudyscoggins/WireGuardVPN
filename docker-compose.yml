@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: wireguard
+    env_file: .env
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - ./config:/config
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  wg-ui:
+    image: ngoduykhanh/wireguard-ui:latest
+    container_name: wg-ui
+    env_file: .env
+    depends_on: [wireguard]
+    ports:
+      - "${WG_UI_PORT}:5000"
+    volumes:
+      - ./config:/config          # ? add this line
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    env_file: .env
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: wg-watchtower
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 */3 * * * *" --cleanup --label-enable
+    restart: unless-stopped
